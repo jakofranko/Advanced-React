@@ -9,7 +9,7 @@ import calcTotalPrice from '../lib/calcTotalPrice';
 import ErrorMessage from './ErrorMessage';
 import User, { CURRENT_USER_QUERY } from './User';
 
-const CREATE_ORDER_MUTATION = gql`
+export const CREATE_ORDER_MUTATION = gql`
     mutation CREATE_ORDER_MUTATION($token: String!) {
         createOrder(token: $token) {
             id
@@ -44,7 +44,10 @@ class TakeMyMoney extends Component {
     render() {
         return (
             <User>
-                {({ data: { me }}) => (
+                {({ data: { me }, loading }) => {
+                  if (loading) return null;
+
+                  return (
                     <Mutation
                         mutation={CREATE_ORDER_MUTATION}
                         refetchQueries={[{ query: CURRENT_USER_QUERY }]}
@@ -64,7 +67,8 @@ class TakeMyMoney extends Component {
                             </StripeCheckout>
                         )}
                     </Mutation>
-                )}
+                );
+            }}
             </User>
         );
     }

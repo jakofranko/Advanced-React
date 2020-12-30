@@ -13,13 +13,13 @@ import calcTotalPrice from '../lib/calcTotalPrice';
 import formatMoney from '../lib/formatMoney';
 
 export const LOCAL_STATE_QUERY = gql`
-    query {
+    query LOCAL_STATE_QUERY {
         cartOpen @client
     }
 `;
 
 export const TOGGLE_CART_MUTATION = gql`
-    mutation {
+    mutation TOGGLE_CART_MUTATION {
         toggleCart @client
     }
 `;

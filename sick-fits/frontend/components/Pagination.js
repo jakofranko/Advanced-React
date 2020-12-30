@@ -20,12 +20,18 @@ function Pagination({ page }) {
     return (
         <Query query={PAGINATION_QUERY}>
             {({ data, loading }) => {
-                const { itemsConnection: { aggregate }} = data;
-                const { count } = aggregate;
-                const pages = Math.ceil(count / perPage);
                 if (loading) return <p>Loading Pagination...</p>
+
+                const {
+                  itemsConnection: {
+                    aggregate: {
+                      count
+                    }
+                  }
+                } = data;
+                const pages = Math.ceil(count / perPage);
                 return (
-                    <PaginationStyles>
+                    <PaginationStyles data-test="Pagination">
                         <Head>
                             <title>
                                 Sick Fits! - Page {page} of {pages}
@@ -40,7 +46,10 @@ function Pagination({ page }) {
                         >
                             <a className="prev" aria-disabled={page <= 1}>Prev</a>
                         </Link>
-                        <p>Page {page ? page : '1'} of {pages}</p>
+                        <p>
+                          Page {page ? page : '1'} of
+                          <span className="totalPages">{pages}</span>
+                        </p>
                         <Link
                             prefetch
                             href={{

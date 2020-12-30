@@ -18,7 +18,7 @@ export default function Nav() {
     return (
         <User>
             {({ data: { me } }) => (
-                <NavStyles>
+                <NavStyles data-test="Nav">
                     <Link href="/items">
                         <a>Shop</a>
                     </Link>

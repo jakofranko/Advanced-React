@@ -9,6 +9,7 @@ export const CURRENT_USER_QUERY = gql`
             id
             email
             name
+            orders
             permissions
             cart {
                 id
