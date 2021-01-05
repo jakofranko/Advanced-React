@@ -3,7 +3,7 @@ import PleaseSignIn from '../components/PleaseSignIn';
 
 function Sell(props) {
     return (
-        <PleaseSignIn>
+        <PleaseSignIn allowedPermissions={['ADMIN', 'ITEMCREATE']}>
             <CreateItem />
         </PleaseSignIn>
     )

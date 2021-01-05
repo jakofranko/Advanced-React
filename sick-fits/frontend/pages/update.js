@@ -1,13 +1,12 @@
-import Link from 'next/link'
 import UpdateItem from '../components/UpdateItem';
+import PleaseSignIn from '../components/PleaseSignIn';
 
-function Sell({ query }) {
+function UpdateItemPage({ query }) {
     return (
-        <div>
-            <p>Sell an Item</p>
+        <PleaseSignIn allowedPermissions={['ADMIN', 'ITEMUPDATE']}>
             <UpdateItem id={query.id} />
-        </div>
+        </PleaseSignIn>
     )
 }
 
-export default Sell;
+export default UpdateItemPage;

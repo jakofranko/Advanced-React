@@ -31,24 +31,7 @@ exports[`<Item /> should render snapshot properly 1`] = `
   <div
     className="buttonList"
   >
-    <Link
-      href={
-        Object {
-          "pathname": "/update",
-          "query": Object {
-            "id": "foo",
-          },
-        }
-      }
-    >
-      <a>
-        Edit ✏
-      </a>
-    </Link>
     <AddToCart
-      id="foo"
-    />
-    <DeleteItem
       id="foo"
     />
   </div>

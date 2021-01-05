@@ -8,9 +8,13 @@ const stripe = require('../stripe');
 
 const Mutations = {
     async createItem(parent, args, ctx, info) {
-        if (!ctx.request.userId) {
+        const { userId, user } = ctx.request;
+
+        if (!userId) {
             throw new Error('You need to be logged in to do that!');
         }
+
+        hasPermission(currentUser, ['ADMIN', 'ITEMCREATE']);
 
         const item = await ctx.db.mutation.createItem({
             data: {
@@ -26,6 +30,14 @@ const Mutations = {
         return item;
     },
     updateItem(parent, args, ctx, info) {
+        const { userId, user } = ctx.request;
+
+        if (!userId) {
+            throw new Error('You need to be logged in to do that!');
+        }
+
+        hasPermission(currentUser, ['ADMIN', 'ITEMUPDATE']);
+
         // First, take acopy of the updates
         const updates = { ...args };
         // Remove ID
@@ -39,9 +51,13 @@ const Mutations = {
         }, info); // Passing in `info` tells the mutation what to return.
     },
     async deleteItem(parent, args, ctx, info) {
-        if (!ctx.request.userId) {
-            throw new Error('You must be logged in');
+        const { userId, user } = ctx.request;
+
+        if (!userId) {
+            throw new Error('You need to be logged in to do that!');
         }
+
+        hasPermission(currentUser, ['ADMIN', 'ITEMDELETE']);
 
         const where = { id: args.id };
         const item = await ctx.db.query.item({ where }, `{ id title user { id } }`);
@@ -72,7 +88,9 @@ const Mutations = {
         // Set cookie on response
         ctx.response.cookie('token', token, {
             httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24 * 365
+            maxAge: 1000 * 60 * 60 * 24 * 365,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "None"
         });
 
         return user;
@@ -93,14 +111,20 @@ const Mutations = {
         // 4. set cooking with token
         ctx.response.cookie('token', token, {
             httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24 * 365
+            maxAge: 1000 * 60 * 60 * 24 * 365,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "None"
         });
         // 5. return user
         return user;
     },
     signout(parent, args, ctx, info) {
         // Invalidate the token cookie
-        ctx.response.clearCookie('token');
+        ctx.response.clearCookie('token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "None"
+        });
         return { message: 'Cookie deleted' };
     },
     async requestReset(parent, { email }, ctx, info) {

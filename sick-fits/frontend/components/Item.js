@@ -8,16 +8,25 @@ import AddToCart from './AddToCart';
 import DeleteItem from './DeleteItem';
 import formatMoney from '../lib/formatMoney';
 
+const canUpdatePerms = ['ADMIN', 'ITEMUPDATE'];
+const canDeletePerms = ['ADMIN', 'ITEMDELETE'];
+
 export default class Item extends Component {
     static propTypes = {
         item: PropTypes.shape({
             title: PropTypes.string.isRequired,
             description: PropTypes.string.isReqruied,
-        })
+        }),
+        userPermissions: PropTypes.arrayOf(PropTypes.string)
     }
-
+    static defaultProps = {
+        userPermissions: []
+    }
     render() {
-        const { item } = this.props;
+        const { item, userPermissions } = this.props;
+        const canUpdate = canUpdatePerms.some(p => userPermissions.includes(p));
+        const canDelete = canDeletePerms.some(p => userPermissions.includes(p));
+
         return (
             <ItemStyles>
                 {item.image && <img src={item.image} alt={item.title}/>}
@@ -33,14 +42,18 @@ export default class Item extends Component {
                 <PriceTag>{formatMoney(item.price)}</PriceTag>
                 <p>{item.description}</p>
                 <div className="buttonList">
-                    <Link href={{
-                        pathname: "/update",
-                        query: { id: item.id }
-                    }}>
-                        <a>Edit ✏</a>
-                    </Link>
+                    {canUpdate && (
+                        <Link href={{
+                            pathname: "/update",
+                            query: { id: item.id }
+                        }}>
+                            <a>Edit ✏</a>
+                        </Link>
+                    )}
                     <AddToCart id={item.id} />
-                    <DeleteItem id={item.id} />
+                    {canDelete && (
+                        <DeleteItem id={item.id} />
+                    )}
                 </div>
             </ItemStyles>
         )

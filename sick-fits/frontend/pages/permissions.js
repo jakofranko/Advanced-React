@@ -3,7 +3,7 @@ import PermissionsControl from '../components/Permissions';
 
 function Permissions(props) {
     return (
-        <PleaseSignIn>
+        <PleaseSignIn allowedPermissions={['ADMIN', 'PERMISSIONUPDATE']}>
             <PermissionsControl />
         </PleaseSignIn>
     )

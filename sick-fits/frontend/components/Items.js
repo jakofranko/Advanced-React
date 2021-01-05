@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { Query } from 'react-apollo';
+import { adopt } from 'react-adopt';
 import gql from 'graphql-tag';
 import styled from 'styled-components';
 import Item from '../components/Item';
+import User from './User';
+import ErrorMessage from './ErrorMessage';
 import Pagination from '../components/Pagination';
 import { perPage } from '../config';
 
@@ -19,6 +22,18 @@ export const ALL_ITEMS_QUERY = gql`
     }
 `;
 
+const Composed = adopt({
+    user: ({ render }) => <User>{render}</User>,
+    items: ({ page, render }) => (
+        <Query
+            query={ALL_ITEMS_QUERY}
+            variables={{ skip: page * perPage - perPage }}
+        >
+            {render}
+        </Query>
+    )
+});
+
 const Center = styled.div`
     text-align: center;
 `;
@@ -29,34 +44,41 @@ const ItemsList = styled.div`
     grid-gap: 60px;
     max-width: ${props => props.theme.maxWidth};
     margin: 0 auto;
-`
+`;
 
 export default class Items extends Component {
     render() {
         return (
             <Center>
-                <Query
-                    query={ALL_ITEMS_QUERY}
-                    variables={{
-                        skip: this.props.page * perPage - perPage,
-                    }}
-                >
-                    {({ data, error, loading }) => {
-                        if (loading) return <p>Loading...</p>
-                        if (error) return <p>Error: {error}</p>
+                <Composed page={this.props.page} >
+                    {({ user, items }) => {
+                        const { data: itemsData } = items;
+                        const { data: { me = {} } } = user;
+                        const { permissions } = me;
+
+                        if (user.loading || items.loading) return <p>Loading...</p>;
+                        if (user.error) return <ErrorMessage error={user.error} />;
+                        if (items.error) return <ErrorMessage error={items.error} />;
+
                         return (
                             <div>
                                 <Pagination page={this.props.page} />
-                                <p>I found {data.items.length} items</p>
+                                <p>I found {itemsData.items.length} items</p>
                                 <ItemsList>
-                                    {data.items.map(item => <Item item={item} key={item.id} />)}
+                                    {itemsData.items.map(item => (
+                                        <Item
+                                            userPermissions={permissions}
+                                            item={item}
+                                            key={item.id}
+                                        />
+                                    ))}
                                 </ItemsList>
                                 <Pagination page={this.props.page} />
                             </div>
-                        )
+                        );
                     }}
-                </Query>
+                </Composed>
             </Center>
-        )
+        );
     }
 }

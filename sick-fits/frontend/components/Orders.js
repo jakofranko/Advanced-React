@@ -46,7 +46,6 @@ class Orders extends Component {
                 {({ data, loading, error}) => {
                     if (loading) return <p>Loading...</p>
                     const { orders } = data;
-                    console.log(orders);
                     return (
                         <div>
                             {error && <ErrorMessage error={error} />}

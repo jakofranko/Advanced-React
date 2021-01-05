@@ -14,57 +14,66 @@ export const SIGNOUT_MUTATION = gql`
     }
 `;
 
+const canCreatePerms = ['ADMIN', 'ITEMCREATE'];
+
 export default function Nav() {
     return (
         <User>
-            {({ data: { me } }) => (
-                <NavStyles data-test="Nav">
-                    <Link href="/items">
-                        <a>Shop</a>
-                    </Link>
-                    {me && (
-                        <>
-                            <Link href="/sell">
-                                <a>Sell</a>
-                            </Link>
-                            <Link href="/orders">
-                                <a>Orders</a>
-                            </Link>
-                            <Link href="/me">
-                                <a>Account</a>
-                            </Link>
-                            <Mutation mutation={TOGGLE_CART_MUTATION}>
-                                {(toggleCart) =>(
-                                    <button onClick={toggleCart}>
-                                        My Cart
-                                        <CartCount count={me.cart.reduce((tally, cartItem) => tally + cartItem.quantity, 0)} />
-                                    </button>
-                                )}
-                            </Mutation>
-                            <Mutation
-                                mutation={SIGNOUT_MUTATION}
-                                refetchQueries={[{ query: CURRENT_USER_QUERY }]}
-                            >
-                                {(signout) => (
-                                    <button
-                                        onClick={async (e) => {
-                                            e.preventDefault();
-                                            await signout();
-                                        }}
-                                    >
-                                        Sign Out
-                                    </button>
-                                )}
-                            </Mutation>
-                        </>
-                    )}
-                    {!me && (
-                        <Link href="/signup">
-                            <a>Sign In</a>
+            {({ data: { me } }) => {
+                const userPermissions = me ? me.permissions : [];
+                const canCreate = canCreatePerms.some(p => userPermissions.includes(p));
+
+                return (
+                    <NavStyles data-test="Nav">
+                        <Link href="/items">
+                            <a>Shop</a>
                         </Link>
-                    )}
-                </NavStyles>
-            )}
+                        {me && (
+                            <>
+                                {canCreate && (
+                                    <Link href="/sell">
+                                        <a>Sell</a>
+                                    </Link
+                                >)}
+                                <Link href="/orders">
+                                    <a>Orders</a>
+                                </Link>
+                                <Link href="/me">
+                                    <a>Account</a>
+                                </Link>
+                                <Mutation mutation={TOGGLE_CART_MUTATION}>
+                                    {(toggleCart) =>(
+                                        <button onClick={toggleCart}>
+                                            My Cart
+                                            <CartCount count={me.cart.reduce((tally, cartItem) => tally + cartItem.quantity, 0)} />
+                                        </button>
+                                    )}
+                                </Mutation>
+                                <Mutation
+                                    mutation={SIGNOUT_MUTATION}
+                                    refetchQueries={[{ query: CURRENT_USER_QUERY }]}
+                                >
+                                    {(signout) => (
+                                        <button
+                                            onClick={async (e) => {
+                                                e.preventDefault();
+                                                await signout();
+                                            }}
+                                        >
+                                            Sign Out
+                                        </button>
+                                    )}
+                                </Mutation>
+                            </>
+                        )}
+                        {!me && (
+                            <Link href="/signup">
+                                <a>Sign In</a>
+                            </Link>
+                        )}
+                    </NavStyles>
+                )
+            }}
         </User>
     );
 }

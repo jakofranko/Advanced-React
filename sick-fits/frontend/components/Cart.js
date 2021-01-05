@@ -52,9 +52,14 @@ class Cart extends Component {
                             </ul>
                             <footer>
                                 <p>{formatMoney(calcTotalPrice(me.cart))}</p>
-                                {me.cart.length && <TakeMyMoney>
-                                    <SickButton>Checkout</SickButton>
-                                </TakeMyMoney>}
+                                {me.cart.length > 0
+                                    ? (
+                                        <TakeMyMoney>
+                                            <SickButton>Checkout</SickButton>
+                                        </TakeMyMoney>
+                                    )
+                                    : null
+                                }
                             </footer>
                         </CartStyles>
                     );
