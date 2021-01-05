@@ -53,8 +53,8 @@ export default class Items extends Component {
                 <Composed page={this.props.page} >
                     {({ user, items }) => {
                         const { data: itemsData } = items;
-                        const { data: { me = {} } } = user;
-                        const { permissions } = me;
+                        const { data: { me } } = user;
+                        const permissions = me ? me.permissions : [];
 
                         if (user.loading || items.loading) return <p>Loading...</p>;
                         if (user.error) return <ErrorMessage error={user.error} />;
@@ -63,7 +63,6 @@ export default class Items extends Component {
                         return (
                             <div>
                                 <Pagination page={this.props.page} />
-                                <p>I found {itemsData.items.length} items</p>
                                 <ItemsList>
                                     {itemsData.items.map(item => (
                                         <Item

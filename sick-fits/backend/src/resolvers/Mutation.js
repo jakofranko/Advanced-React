@@ -6,6 +6,13 @@ const { makeANiceEmail, transport } = require('../../mail');
 const { hasPermission } = require('../utils');
 const stripe = require('../stripe');
 
+const tokenCookieOptions = {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+};
+
 const Mutations = {
     async createItem(parent, args, ctx, info) {
         const { userId, user } = ctx.request;
@@ -86,46 +93,31 @@ const Mutations = {
         const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
 
         // Set cookie on response
-        ctx.response.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24 * 365,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "None"
-        });
+        ctx.response.cookie('token', token, tokenCookieOptions);
 
         return user;
     },
     async signin(parent, { email, password }, ctx, info) {
         // 1. Check for user
         const user = await ctx.db.query.user({ where: { email }});
-        if (!user) {
-            throw new Error(`No such user found for email ${email}`);
-        }
+
         // 2. validate password
         const valid = await bcrypt.compare(password, user.password);
-        if (!valid) {
-            throw new Error('Invalid Password!');
+        if (!user || !valid) {
+            throw new Error('Invalid password or user');
         }
+
         // 3. generate JWT token
         const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
         // 4. set cooking with token
-        ctx.response.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24 * 365,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "None"
-        });
+        ctx.response.cookie('token', token, tokenCookieOptions);
         // 5. return user
         return user;
     },
     signout(parent, args, ctx, info) {
         // Invalidate the token cookie
-        ctx.response.clearCookie('token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "None"
-        });
-        return { message: 'Cookie deleted' };
+        ctx.response.clearCookie('token', tokenCookieOptions);
+        return { message: 'Signed out' };
     },
     async requestReset(parent, { email }, ctx, info) {
         // 1. Check if real user
@@ -186,10 +178,7 @@ const Mutations = {
 
         // Generate JWT
         const token = jwt.sign({ userId: updatedUser.id }, process.env.APP_SECRET);
-        ctx.response.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 1000 * 60 * 60 * 24 * 365
-        });
+        ctx.response.cookie('token', token, tokenCookieOptions);
 
         return updatedUser;
     },

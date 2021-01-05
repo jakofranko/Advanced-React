@@ -47,7 +47,7 @@ function Pagination({ page }) {
                             <a className="prev" aria-disabled={page <= 1}>Prev</a>
                         </Link>
                         <p>
-                          Page {page ? page : '1'} of
+                          Page {page ? page : '1'} of&nbsp;
                           <span className="totalPages">{pages}</span>
                         </p>
                         <Link
